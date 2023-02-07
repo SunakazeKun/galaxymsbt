@@ -43,6 +43,7 @@ class GalaxyMsbtEditor(QMainWindow):
     actionOpen: QAction
     actionSave: QAction
     actionOptionCompression: QAction
+    actionAbout: QAction
     lineArchivePath: QLineEdit
     lineArchiveRoot: QLineEdit
     buttonChangeRoot: QPushButton
@@ -124,6 +125,9 @@ class GalaxyMsbtEditor(QMainWindow):
         # Options menu events
         self.actionOptionCompression.triggered.connect(SettingsHolder.set_compress_arc)
 
+        # About menu events
+        self.actionAbout.triggered.connect(self.show_about)
+
         # Archive events
         self.buttonChangeRoot.clicked.connect(self.change_archive_root)
 
@@ -151,6 +155,12 @@ class GalaxyMsbtEditor(QMainWindow):
         self.spinUnk7.valueChanged.connect(self.set_message_entry_unk_7)
         self.textMessageText.textChanged.connect(self.set_message_entry_text)
         self.textComment.textChanged.connect(self.set_message_entry_comment)
+
+    def show_about(self):
+        description = f"{PROGRAM_TITLE} by Aurum\n\n" \
+                      f"- Special thanks to SY24 who created the UI icons.\n" \
+                      f"- Text icons ripped from the original game."
+        QMessageBox.information(self, "About", description)
 
     # ------------------------------------------------------------------------------------------------------------------
     # UI helpers
