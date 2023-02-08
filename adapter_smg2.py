@@ -192,7 +192,7 @@ class SuperMarioGalaxy2Adapter(LMSAdapter):
             except Exception:
                 raise LMSException(f"Couldn't write ruby tag. Full tag was '{tag}'")
 
-            data_size = 4 + len(encoded_kanji) + len(encoded_furigana)
+            data_size = 4 + len(encoded_furigana)
 
             self._write_tag_info_(stream, 0, 0, data_size)
             stream.write_u16(len(encoded_kanji))
