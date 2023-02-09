@@ -64,7 +64,7 @@ class SuperMarioGalaxy2Adapter(LMSAdapter):
                     raise LMSException(f"Wait tag length should be 2 (tag at 0x{tag_position})")
 
                 wait_time = stream.read_u16()
-                return f'[wait:{wait_time}]'
+                return f'[delay:{wait_time}]'
             elif tag_id == 1:
                 if len_data != 0:
                     raise LMSException(f"Page break tag length should be 0 (tag at 0x{tag_position})")
@@ -218,7 +218,7 @@ class SuperMarioGalaxy2Adapter(LMSAdapter):
             stream.write_u16(color_id)
 
         # Display
-        elif tag_name == "wait":
+        elif tag_name == "delay":
             self._verify_tag_attr_size_(tag_name, tag_attrs, 1, tag)
             wait_time = self._get_tag_attr_u16_(tag_attrs[0], tag)
 

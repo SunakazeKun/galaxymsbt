@@ -4,7 +4,7 @@ from PyQt5.QtCore import QSettings, QThread
 
 __all__ = ["SettingsHolder", "WorkerThread", "resolve_asset", "PROGRAM_VERSION", "PROGRAM_TITLE"]
 
-PROGRAM_VERSION = "v0.1.1"
+PROGRAM_VERSION = "v0.1.2"
 PROGRAM_TITLE = f"galaxymsbt -- Super Mario Galaxy 2 MSBT Editor -- {PROGRAM_VERSION}"
 
 
