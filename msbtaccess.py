@@ -18,8 +18,9 @@ class MsbtAccessor:
         :param adapter: the adapter maker used to construct the game-specific adapter.
         :param file: the file inside the RARC archive.
         """
-        self._file_ = file
-        self._document_ = LMSDocument(adapter) if len(file.data) == 0 else pymsb.msbt_from_buffer(adapter, file.data)
+        self._file_: JKRArchiveFile = file
+        self._document_: LMSDocument = LMSDocument(adapter) if len(file.data) == 0\
+            else pymsb.msbt_from_buffer(adapter, file.data)
 
     @property
     def messages(self) -> list[LMSMessage]:

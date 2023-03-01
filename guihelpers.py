@@ -4,7 +4,7 @@ from PyQt5.QtCore import QSettings, QThread
 
 __all__ = ["SettingsHolder", "WorkerThread", "resolve_asset", "PROGRAM_VERSION", "PROGRAM_TITLE"]
 
-PROGRAM_VERSION = "v0.1.2"
+PROGRAM_VERSION = "v0.1.3"
 PROGRAM_TITLE = f"galaxymsbt -- Super Mario Galaxy 2 MSBT Editor -- {PROGRAM_VERSION}"
 
 
@@ -44,10 +44,9 @@ class SettingsHolder:
 # Basic service thread that may catch an exception
 # ----------------------------------------------------------------------------------------------------------------------
 class WorkerThread(QThread):
-    _exception_: Exception = None
-
     def __init__(self, parent):
         super().__init__(parent)
+        self._exception_: Exception = None
 
     @property
     def has_exception(self) -> bool:

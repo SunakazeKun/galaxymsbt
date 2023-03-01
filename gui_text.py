@@ -14,28 +14,34 @@ __all__ = ["GalaxyTextEditor"]
 
 
 class GalaxyTextEditor(QDialog):
-    _adapter_maker_: type[SuperMarioGalaxy2Adapter] = None
-
-    textMessageText: QPlainTextEdit
-    buttonTagPageBreak: QToolButton
-    buttonTagTextSize: QToolButton
-    buttonTagTextColor: QToolButton
-    buttonTagResetColor: QToolButton
-    buttonTagNumberFont: QToolButton
-    buttonTagYCenter: QToolButton
-    buttonTagXCenter: QToolButton
-    buttonTagRuby: QToolButton
-    buttonTagPicture: QToolButton
-    buttonTagSound: QToolButton
-    buttonTagPlayer: QToolButton
-    buttonTagRaceTime: QToolButton
-    buttonTagDelay: QToolButton
-    buttonTagFormatNumber: QToolButton
-    buttonTagFormatString: QToolButton
-    buttonBox: QDialogButtonBox
-
     def __init__(self, parent: QMainWindow, adapter_maker: type[SuperMarioGalaxy2Adapter]):
         super().__init__(parent)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Variable declarations
+
+        self._adapter_maker_: type[SuperMarioGalaxy2Adapter] = None
+
+        self.textMessageText: QPlainTextEdit = None
+        self.buttonTagPageBreak: QToolButton = None
+        self.buttonTagTextSize: QToolButton = None
+        self.buttonTagTextColor: QToolButton = None
+        self.buttonTagResetColor: QToolButton = None
+        self.buttonTagNumberFont: QToolButton = None
+        self.buttonTagYCenter: QToolButton = None
+        self.buttonTagXCenter: QToolButton = None
+        self.buttonTagRuby: QToolButton = None
+        self.buttonTagPicture: QToolButton = None
+        self.buttonTagSound: QToolButton = None
+        self.buttonTagPlayer: QToolButton = None
+        self.buttonTagRaceTime: QToolButton = None
+        self.buttonTagDelay: QToolButton = None
+        self.buttonTagFormatNumber: QToolButton = None
+        self.buttonTagFormatString: QToolButton = None
+        self.buttonBox: QDialogButtonBox = None
+
+        # --------------------------------------------------------------------------------------------------------------
+
         self._ui_ = uic.loadUi(resolve_asset("assets/dialog_text.ui"), self)
         self.setWindowTitle(PROGRAM_TITLE)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
@@ -199,13 +205,19 @@ class GalaxyTextEditor(QDialog):
 
 
 class InsertRubyDialog(QDialog):
-    labelDescription: QLabel
-    lineKanji: QLineEdit
-    lineFurigana: QLineEdit
-    buttonBox: QDialogButtonBox
-
     def __init__(self, parent: QWidget):
         super().__init__(parent)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Variable declarations
+
+        self.labelDescription: QLabel = None
+        self.lineKanji: QLineEdit = None
+        self.lineFurigana: QLineEdit = None
+        self.buttonBox: QDialogButtonBox = None
+
+        # --------------------------------------------------------------------------------------------------------------
+
         self._ui_ = uic.loadUi(resolve_asset("assets/dialog_ruby.ui"), self)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.buttonBox.accepted.connect(self.accept)
@@ -225,12 +237,18 @@ class InsertRubyDialog(QDialog):
 
 
 class PictureIconDialog(QDialog):
-    comboIcons: QComboBox
-    labelDescription: QLabel
-    buttonBox: QDialogButtonBox
-
     def __init__(self, parent: QWidget, adapter_maker: type[SuperMarioGalaxy2Adapter]):
         super(PictureIconDialog, self).__init__(parent)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Variable declarations
+
+        self.comboIcons: QComboBox = None
+        self.labelDescription: QLabel = None
+        self.buttonBox: QDialogButtonBox = None
+
+        # --------------------------------------------------------------------------------------------------------------
+
         self._ui_ = uic.loadUi(resolve_asset("assets/dialog_picture.ui"), self)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.buttonBox.accepted.connect(self.accept)
@@ -265,14 +283,20 @@ class PictureIconDialog(QDialog):
 
 
 class IntVarDialog(QDialog):
-    comboFormat: QComboBox
-    spinArgumentIdx: QSpinBox
-    spinDefaultValue: QSpinBox
-    labelDescription: QLabel
-    buttonBox: QDialogButtonBox
-
     def __init__(self, parent: QWidget):
         super(IntVarDialog, self).__init__(parent)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Variable declarations
+
+        self.comboFormat: QComboBox = None
+        self.spinArgumentIdx: QSpinBox = None
+        self.spinDefaultValue: QSpinBox = None
+        self.labelDescription: QLabel = None
+        self.buttonBox: QDialogButtonBox = None
+
+        # --------------------------------------------------------------------------------------------------------------
+
         self._ui_ = uic.loadUi(resolve_asset("assets/dialog_intvar.ui"), self)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.buttonBox.accepted.connect(self.accept)
@@ -294,14 +318,20 @@ class IntVarDialog(QDialog):
 
 
 class StringVarDialog(QDialog):
-    spinTagID: QSpinBox
-    spinArgumentIdx: QSpinBox
-    lineDefaultPointer: QLineEdit
-    labelDescription: QLabel
-    buttonBox: QDialogButtonBox
-
     def __init__(self, parent: QWidget):
         super(StringVarDialog, self).__init__(parent)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Variable declarations
+
+        self.spinTagID: QSpinBox = None
+        self.spinArgumentIdx: QSpinBox = None
+        self.lineDefaultPointer: QLineEdit = None
+        self.labelDescription: QLabel = None
+        self.buttonBox: QDialogButtonBox = None
+
+        # --------------------------------------------------------------------------------------------------------------
+
         self._ui_ = uic.loadUi(resolve_asset("assets/dialog_stringvar.ui"), self)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.buttonBox.accepted.connect(self.accept)

@@ -19,57 +19,63 @@ CONFIG_PATH = "adapter_config.json"
 
 
 class GalaxyMsbtEditor(QMainWindow):
-    # Data storage
-    current_arc_path: str = ""                 # Path to the current archive file
-    archive: JKRArchive = None                 # Current RARC archive
-    msbt_accessors: list[MsbtAccessor] = None  # List of MSBT files in archive
-    current_msbt: MsbtAccessor = None          # Currently edited MSBT file
-    current_message: LMSMessage = None         # Currently edited LMS entry
-
-    # Data helpers
-    adapter: type[SuperMarioGalaxy2Adapter]       # Active adapter for parsing MSBT files
-    rarc_reader_thread: RarcReaderThread          # Reads RARC file and parses MSBT files
-    rarc_writer_thread: RarcWriterThread          # Packs MSBT files and writes RARC file
-    msbt_file_names: QStringListModel = None      # Model reflecting MSBT file names
-    message_entry_names: QStringListModel = None  # Model reflecting message entry names
-    unsaved_changes: bool = False                 # True if there are some edits
-
-    # Helper forms
-    _gui_text_editor_: GalaxyTextEditor
-
-    # UI elements (initialized by UI loader)
-    statusBar: QStatusBar
-    actionNew: QAction
-    actionOpen: QAction
-    actionSave: QAction
-    actionOptionCompression: QAction
-    actionAbout: QAction
-    lineArchivePath: QLineEdit
-    lineArchiveRoot: QLineEdit
-    buttonChangeRoot: QPushButton
-    buttonMsbtNew: QPushButton
-    buttonMsbtDelete: QPushButton
-    buttonMessagesAdd: QPushButton
-    buttonMessagesRemove: QPushButton
-    buttonMessagesDuplicate: QPushButton
-    buttonMessagesSort: QPushButton
-    listMsbtFiles: QListView
-    listMessageEntries: QListView
-    buttonChangeLabel: QPushButton
-    buttonShowEditor: QPushButton
-    lineLabel: QLineEdit
-    comboTalkType: QComboBox
-    comboBalloonType: QComboBox
-    comboSoundName: QComboBox
-    comboCameraType: QComboBox
-    spinCameraId: QSpinBox
-    spinMsgLinkId: QSpinBox
-    spinUnk7: QSpinBox
-    textMessageText: QPlainTextEdit
-    textComment: QPlainTextEdit
-
     def __init__(self):
         super().__init__(None)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Variable declarations
+
+        # Data storage
+        self.current_arc_path: str = ""                 # Path to the current archive file
+        self.archive: JKRArchive = None                 # Current RARC archive
+        self.msbt_accessors: list[MsbtAccessor] = None  # List of MSBT files in archive
+        self.current_msbt: MsbtAccessor = None          # Currently edited MSBT file
+        self.current_message: LMSMessage = None         # Currently edited LMS entry
+
+        # Data helpers
+        self.adapter: type[SuperMarioGalaxy2Adapter] = None  # Active adapter for parsing MSBT files
+        self.rarc_reader_thread: RarcReaderThread = None     # Reads RARC file and parses MSBT files
+        self.rarc_writer_thread: RarcWriterThread = None     # Packs MSBT files and writes RARC file
+        self.msbt_file_names: QStringListModel = None        # Model reflecting MSBT file names
+        self.message_entry_names: QStringListModel = None    # Model reflecting message entry names
+        self.unsaved_changes: bool = False                   # True if there are some edits
+
+        # Helper forms
+        self._gui_text_editor_: GalaxyTextEditor = None
+
+        # UI elements (initialized by UI loader)
+        self.statusBar: QStatusBar = None
+        self.actionNew: QAction = None
+        self.actionOpen: QAction = None
+        self.actionSave: QAction = None
+        self.actionOptionCompression: QAction = None
+        self.actionAbout: QAction = None
+        self.lineArchivePath: QLineEdit = None
+        self.lineArchiveRoot: QLineEdit = None
+        self.buttonChangeRoot: QPushButton = None
+        self.buttonMsbtNew: QPushButton = None
+        self.buttonMsbtDelete: QPushButton = None
+        self.buttonMessagesAdd: QPushButton = None
+        self.buttonMessagesRemove: QPushButton = None
+        self.buttonMessagesDuplicate: QPushButton = None
+        self.buttonMessagesSort: QPushButton = None
+        self.listMsbtFiles: QListView = None
+        self.listMessageEntries: QListView = None
+        self.buttonChangeLabel: QPushButton = None
+        self.buttonShowEditor: QPushButton = None
+        self.lineLabel: QLineEdit = None
+        self.comboTalkType: QComboBox = None
+        self.comboBalloonType: QComboBox = None
+        self.comboSoundName: QComboBox = None
+        self.comboCameraType: QComboBox = None
+        self.spinCameraId: QSpinBox = None
+        self.spinMsgLinkId: QSpinBox = None
+        self.spinUnk7: QSpinBox = None
+        self.textMessageText: QPlainTextEdit = None
+        self.textComment: QPlainTextEdit = None
+
+        # --------------------------------------------------------------------------------------------------------------
+
         self._ui_ = uic.loadUi(resolve_asset("assets/editor.ui"), self)
         self.setWindowTitle(PROGRAM_TITLE)
 
@@ -524,7 +530,17 @@ class GalaxyMsbtEditor(QMainWindow):
             self.unsaved_changes = True
 
     def duplicate_message_entry(self):
-        pass
+        selected_indices = self.listMessageEntries.selectionModel().selectedIndexes()
+
+        if len(selected_indices) < 1:
+            return
+
+        self.message_entry_names.blockSignals(True)
+
+        # Implement remaining logic, duh
+
+        self.message_entry_names.blockSignals(False)
+        # self.unsaved_changes = True
 
     def sort_message_entries(self):
         self.current_msbt.sort_messages()
@@ -535,6 +551,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.reset_message_entries_model()
         self.message_entry_names.blockSignals(False)
         self.populate_message_entries_model()
+        self.unsaved_changes = True
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dialogs & prompts
@@ -576,10 +593,10 @@ class GalaxyMsbtEditor(QMainWindow):
         return msbt_name, valid
 
     def prompt_message_label(self) -> tuple[str, bool]:
-        message_label, valid = QInputDialog.getText(self, self.windowTitle(), "Specify message label:",
+        message_label, valid = QInputDialog.getText(self, self.windowTitle(), "Specify label (max. 255 characters):",
                                                     flags=self.windowFlags())
         message_label = message_label.strip()
-        return message_label, valid
+        return message_label, valid and len(message_label) <= 255
 
     # ---------------------------------------------------------
 
@@ -767,20 +784,16 @@ class GalaxyMsbtEditor(QMainWindow):
 # Service threads for reading & saving
 # ----------------------------------------------------------------------------------------------------------------------
 class RarcReaderThread(WorkerThread):
-    adapter: type[SuperMarioGalaxy2Adapter] = None
-    arc_path: str = ""
-    archive: JKRArchive = None
-    msbt_accessors: list[MsbtAccessor] = None
-
     def __init__(self, parent: QMainWindow, arc_path: str, adapter: type[SuperMarioGalaxy2Adapter]):
         super().__init__(parent)
-        self.adapter = adapter
-        self.arc_path = arc_path
+        self.adapter: type[SuperMarioGalaxy2Adapter] = adapter
+        self.arc_path: str = arc_path
+        self.archive: JKRArchive = None
+        self.msbt_accessors: list[MsbtAccessor] = []
 
     def run(self):
         try:
             self.archive = pyjkernel.from_archive_file(self.arc_path)
-            self.msbt_accessors = []
 
             for file in filter(lambda f: f.name.endswith(".msbt"), self.archive.list_files(self.archive.root_name)):
                 self.msbt_accessors.append(MsbtAccessor(self.adapter, file))
@@ -789,17 +802,12 @@ class RarcReaderThread(WorkerThread):
 
 
 class RarcWriterThread(WorkerThread):
-    arc_path: str = ""
-    archive: JKRArchive = None
-    msbt_accessors: list[MsbtAccessor] = None
-    compress_rarc: bool = False
-
     def __init__(self, parent: QMainWindow, arc_path: str, archive: JKRArchive, msbt_accessors: list[MsbtAccessor]):
         super().__init__(parent)
-        self.arc_path = arc_path
-        self.archive = archive
-        self.msbt_accessors = msbt_accessors
-        self.compress_rarc = SettingsHolder.is_compress_arc()
+        self.arc_path: str = arc_path
+        self.archive: JKRArchive = archive
+        self.msbt_accessors: list[MsbtAccessor] = msbt_accessors
+        self.compress_rarc: bool = SettingsHolder.is_compress_arc()
 
     def run(self):
         try:

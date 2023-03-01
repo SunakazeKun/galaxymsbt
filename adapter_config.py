@@ -36,6 +36,9 @@ def initialize_custom_smg2_adapter_maker() -> type[SuperMarioGalaxy2Adapter]:
             "race_times": adapter_maker.RACE_TIMES,
             "picture_icons": picture_icons,
             "message_sounds": adapter_maker.MESSAGE_SOUNDS,
+            "talk_types": adapter_maker.TALK_TYPES,
+            "balloon_types": adapter_maker.BALLOON_TYPES,
+            "camera_types": adapter_maker.CAMERA_TYPES
         }
 
         with open(__CONFIG_FILE_NAME__, "w", encoding="utf-8-sig") as f:
@@ -52,6 +55,9 @@ def initialize_custom_smg2_adapter_maker() -> type[SuperMarioGalaxy2Adapter]:
     _check_list_and_elements_type_(config_data, "race_times", str)
     _check_dict_and_elements_type_(config_data, "picture_icons", int)
     _check_list_and_elements_type_(config_data, "message_sounds", str)
+    _check_list_and_elements_type_(config_data, "talk_types", str)
+    _check_list_and_elements_type_(config_data, "balloon_types", str)
+    _check_list_and_elements_type_(config_data, "camera_types", str)
 
     # Overwrite adapter maker's lists
     if "font_colors" in config_data:
@@ -71,6 +77,15 @@ def initialize_custom_smg2_adapter_maker() -> type[SuperMarioGalaxy2Adapter]:
 
     if "message_sounds" in config_data:
         adapter_maker.MESSAGE_SOUNDS = config_data["message_sounds"]
+
+    if "talk_types" in config_data:
+        adapter_maker.TALK_TYPES = config_data["talk_types"]
+
+    if "balloon_types" in config_data:
+        adapter_maker.BALLOON_TYPES = config_data["balloon_types"]
+
+    if "camera_types" in config_data:
+        adapter_maker.CAMERA_TYPES = config_data["camera_types"]
 
     return adapter_maker
 
