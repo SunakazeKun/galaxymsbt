@@ -550,7 +550,7 @@ class SuperMarioGalaxy2Adapter(LMSAdapter):
 
     TALK_TYPES = ["Normal", "Shout", "Auto", "Global"]
     BALLOON_TYPES = ["White box", "White box (1)", "\"Call\"", "Signboard", "Icon bubble"]
-    CAMERA_TYPES = ["Normal", "Event"]
+    CAMERA_TYPES = ["Normal", "Event", "None"]
     MESSAGE_SOUNDS = [
         "null (0)",
         "Default",
