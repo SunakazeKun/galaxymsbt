@@ -77,20 +77,6 @@
                  <property name="bottomMargin">
                   <number>0</number>
                  </property>
-                 <item row="0" column="0">
-                  <widget class="QPushButton" name="buttonLmsAccessorNew">
-                   <property name="text">
-                    <string>New</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QPushButton" name="buttonLmsAccessorDelete">
-                   <property name="text">
-                    <string>Delete</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="2">
                   <spacer name="horizontalSpacer">
                    <property name="orientation">
@@ -103,6 +89,40 @@
                     </size>
                    </property>
                   </spacer>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QToolButton" name="buttonLmsAccessorNew">
+                   <property name="text">
+                    <string>New</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>tool_msb_add.png</normaloff>tool_msb_add.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>24</width>
+                     <height>24</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QToolButton" name="buttonLmsAccessorDelete">
+                   <property name="text">
+                    <string>Delete</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>tool_msb_delete.png</normaloff>tool_msb_delete.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>24</width>
+                     <height>24</height>
+                    </size>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -155,34 +175,6 @@
                   <property name="bottomMargin">
                    <number>0</number>
                   </property>
-                  <item row="0" column="1">
-                   <widget class="QPushButton" name="buttonMessagesRemove">
-                    <property name="text">
-                     <string>Remove</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QPushButton" name="buttonMessagesDuplicate">
-                    <property name="text">
-                     <string>Duplicate</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QPushButton" name="buttonMessagesAdd">
-                    <property name="text">
-                     <string>Add</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QPushButton" name="buttonMessagesSort">
-                    <property name="text">
-                     <string>Sort</string>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="0" column="4">
                    <spacer name="horizontalSpacer_2">
                     <property name="orientation">
@@ -195,6 +187,74 @@
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QToolButton" name="buttonMessagesAdd">
+                    <property name="text">
+                     <string>Add</string>
+                    </property>
+                    <property name="icon">
+                     <iconset>
+                      <normaloff>tool_message_add.png</normaloff>tool_message_add.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QToolButton" name="buttonMessagesRemove">
+                    <property name="text">
+                     <string>Remove</string>
+                    </property>
+                    <property name="icon">
+                     <iconset>
+                      <normaloff>tool_message_delete.png</normaloff>tool_message_delete.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QToolButton" name="buttonMessagesDuplicate">
+                    <property name="text">
+                     <string>Duplicate</string>
+                    </property>
+                    <property name="icon">
+                     <iconset>
+                      <normaloff>tool_message_duplicate.png</normaloff>tool_message_duplicate.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QToolButton" name="buttonMessagesSort">
+                    <property name="text">
+                     <string>Sort</string>
+                    </property>
+                    <property name="icon">
+                     <iconset>
+                      <normaloff>tool_message_sort.png</normaloff>tool_message_sort.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -243,34 +303,6 @@
                   <property name="bottomMargin">
                    <number>0</number>
                   </property>
-                  <item row="0" column="1">
-                   <widget class="QPushButton" name="buttonFlowchartsRemove">
-                    <property name="text">
-                     <string>Remove</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QPushButton" name="buttonFlowchartsAdd">
-                    <property name="text">
-                     <string>Add</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QPushButton" name="buttonFlowchartsDuplicate">
-                    <property name="text">
-                     <string>Duplicate</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QPushButton" name="buttonFlowchartsSort">
-                    <property name="text">
-                     <string>Sort</string>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="0" column="4">
                    <spacer name="horizontalSpacer_3">
                     <property name="orientation">
@@ -283,6 +315,74 @@
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QToolButton" name="buttonFlowchartsSort">
+                    <property name="text">
+                     <string>Sort</string>
+                    </property>
+                    <property name="icon">
+                     <iconset>
+                      <normaloff>tool_message_sort.png</normaloff>tool_message_sort.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QToolButton" name="buttonFlowchartsDuplicate">
+                    <property name="text">
+                     <string>Duplicate</string>
+                    </property>
+                    <property name="icon">
+                     <iconset>
+                      <normaloff>tool_flow_duplicate.png</normaloff>tool_flow_duplicate.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QToolButton" name="buttonFlowchartsRemove">
+                    <property name="text">
+                     <string>Remove</string>
+                    </property>
+                    <property name="icon">
+                     <iconset>
+                      <normaloff>tool_flow_remove.png</normaloff>tool_flow_remove.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QToolButton" name="buttonFlowchartsAdd">
+                    <property name="text">
+                     <string>Add</string>
+                    </property>
+                    <property name="icon">
+                     <iconset>
+                      <normaloff>tool_flow_add.png</normaloff>tool_flow_add.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -446,7 +546,7 @@
              <string>This value is unused and has no effect.</string>
             </property>
             <property name="text">
-             <string>Unk. 7</string>
+             <string>Unused byte</string>
             </property>
            </widget>
           </item>

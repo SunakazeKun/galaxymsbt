@@ -4,8 +4,8 @@ from PyQt5.QtCore import QSettings, QThread
 
 __all__ = ["SettingsHolder", "WorkerThread", "resolve_asset", "PROGRAM_VERSION", "PROGRAM_TITLE"]
 
-PROGRAM_VERSION = "v0.2.0"
-PROGRAM_TITLE = f"galaxymsbt -- Super Mario Galaxy 2 MSBT Editor -- {PROGRAM_VERSION}"
+PROGRAM_VERSION = "v0.2.1"
+PROGRAM_TITLE = f"galaxymsbt -- Super Mario Galaxy 2 Text editor -- {PROGRAM_VERSION}"
 
 
 def resolve_asset(relative_path: str):
