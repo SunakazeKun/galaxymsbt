@@ -508,16 +508,16 @@ class GalaxyMsbtEditor(QMainWindow):
             return
 
         # Collect labels and indices to be removed
-        label_model_rows = {}
+        remove_label_rows = {}
 
         for selected_index in reversed(selected_indices):
             label = self.message_entry_names.data(selected_index, 0)
-            label_model_rows[label] = selected_index.row()
+            remove_label_rows[label] = selected_index.row()
 
         # Remove message entries
         failed_labels = []
 
-        for label in label_model_rows.keys():
+        for label in remove_label_rows.keys():
             if self.current_accessor.delete_message(label):
                 if self.current_message is not None and self.current_message.label == label:
                     self.set_message_entry_components_enabled(False)
@@ -528,10 +528,10 @@ class GalaxyMsbtEditor(QMainWindow):
 
             else:
                 failed_labels.append(label)
-                label_model_rows[label] = -2  # Invalid row to prevent it from deletion
+                remove_label_rows[label] = -2  # Invalid row to prevent it from deletion
 
         # Remove labels from model
-        for row in filter(lambda i: i >= 0, label_model_rows.values()):
+        for row in filter(lambda i: i >= 0, remove_label_rows.values()):
             self.message_entry_names.removeRow(row)
 
         # Notify about failed labels
@@ -595,7 +595,7 @@ class GalaxyMsbtEditor(QMainWindow):
             return self.show_yes_no_prompt(description)
         return True
 
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     def prompt_root_name(self) -> tuple[str, bool]:
         root_name, valid = QInputDialog.getText(self, self.windowTitle(), "Specify archive root folder name:",
@@ -615,7 +615,7 @@ class GalaxyMsbtEditor(QMainWindow):
         message_label = message_label.strip()
         return message_label, valid and len(message_label) <= 255
 
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     def select_open_arc_file(self) -> tuple[str, bool]:
         filters = "ARC file (*.arc);;RARC file (*.rarc)"
