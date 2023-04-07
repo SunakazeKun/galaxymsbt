@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pyjkernel import JKRArchive, JKRCompression
 from pymsb import LMSMessage, LMSException
-from msbtaccess import MsbtAccessor
+from msbtaccess import LMSAccessor
 from gui_text import GalaxyTextEditor
 from guihelpers import SettingsHolder, WorkerThread, resolve_asset, PROGRAM_TITLE
 from adapter_smg2 import SuperMarioGalaxy2Adapter
@@ -28,15 +28,15 @@ class GalaxyMsbtEditor(QMainWindow):
         # Data storage
         self.current_arc_path: str = ""                 # Path to the current archive file
         self.archive: JKRArchive = None                 # Current RARC archive
-        self.msbt_accessors: list[MsbtAccessor] = None  # List of MSBT files in archive
-        self.current_msbt: MsbtAccessor = None          # Currently edited MSBT file
+        self.lms_accessors: list[LMSAccessor] = None    # List of text files in archive
+        self.current_accessor: LMSAccessor = None       # Currently edited text file
         self.current_message: LMSMessage = None         # Currently edited LMS entry
 
         # Data helpers
-        self.adapter: type[SuperMarioGalaxy2Adapter] = None  # Active adapter for parsing MSBT files
-        self.rarc_reader_thread: RarcReaderThread = None     # Reads RARC file and parses MSBT files
-        self.rarc_writer_thread: RarcWriterThread = None     # Packs MSBT files and writes RARC file
-        self.msbt_file_names: QStringListModel = None        # Model reflecting MSBT file names
+        self.adapter: type[SuperMarioGalaxy2Adapter] = None  # Active adapter for parsing text files
+        self.rarc_reader_thread: RarcReaderThread = None     # Reads RARC file and parses text files
+        self.rarc_writer_thread: RarcWriterThread = None     # Packs text files and writes RARC file
+        self.lms_accessor_names: QStringListModel = None     # Model reflecting text file names
         self.message_entry_names: QStringListModel = None    # Model reflecting message entry names
         self.unsaved_changes: bool = False                   # True if there are some edits
 
@@ -79,9 +79,9 @@ class GalaxyMsbtEditor(QMainWindow):
         self._ui_ = uic.loadUi(resolve_asset("assets/editor.ui"), self)
         self.setWindowTitle(PROGRAM_TITLE)
 
-        self.msbt_file_names = QStringListModel()
+        self.lms_accessor_names = QStringListModel()
         self.message_entry_names = QStringListModel()
-        self.listMsbtFiles.setModel(self.msbt_file_names)
+        self.listMsbtFiles.setModel(self.lms_accessor_names)
         self.listMessageEntries.setModel(self.message_entry_names)
 
         self.actionOptionCompression.blockSignals(True)
@@ -89,7 +89,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.actionOptionCompression.blockSignals(False)
 
         self.reset_message_entry_values()
-        self.set_msbt_file_components_enabled(False)
+        self.set_lms_file_components_enabled(False)
         self.set_archive_components_enabled(False)
         self.set_message_entries_components_enabled(False)
         self.set_message_entry_components_enabled(False)
@@ -138,9 +138,9 @@ class GalaxyMsbtEditor(QMainWindow):
         self.buttonChangeRoot.clicked.connect(self.change_archive_root)
 
         # MSBT list events
-        self.listMsbtFiles.selectionModel().selectionChanged.connect(self.on_msbt_file_selected)
-        self.buttonMsbtNew.clicked.connect(self.new_msbt)
-        self.buttonMsbtDelete.clicked.connect(self.delete_msbt)
+        self.listMsbtFiles.selectionModel().selectionChanged.connect(self.on_lms_accessor_selected)
+        self.buttonMsbtNew.clicked.connect(self.new_lms)
+        self.buttonMsbtDelete.clicked.connect(self.delete_lms)
 
         # Message list events
         self.listMessageEntries.selectionModel().selectionChanged.connect(self.on_message_entry_selected)
@@ -175,14 +175,14 @@ class GalaxyMsbtEditor(QMainWindow):
         self.unsaved_changes = False
 
         self.set_archive_components_enabled(False)
-        self.set_msbt_file_components_enabled(False)
+        self.set_lms_file_components_enabled(False)
         self.set_message_entries_components_enabled(False)
         self.set_message_entry_components_enabled(False)
 
         self.lineArchivePath.setText("")
         self.lineArchiveRoot.setText("")
 
-        self.reset_msbt_files_model()
+        self.reset_lms_accessors_model()
         self.reset_message_entries_model()
         self.reset_message_entry_values()
 
@@ -199,7 +199,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.lineArchiveRoot.setEnabled(state)
         self.buttonChangeRoot.setEnabled(False)  # This should be adjusted in the future!
 
-    def set_msbt_file_components_enabled(self, state: bool):
+    def set_lms_file_components_enabled(self, state: bool):
         self.buttonMsbtNew.blockSignals(not state)
         self.buttonMsbtDelete.blockSignals(not state)
         self.listMsbtFiles.selectionModel().blockSignals(not state)
@@ -247,24 +247,24 @@ class GalaxyMsbtEditor(QMainWindow):
         self.textMessageText.setEnabled(state)
         self.textComment.setEnabled(state)
 
-    def populate_msbt_files_model(self):
-        start_row = self.msbt_file_names.rowCount()
-        self.msbt_file_names.insertRows(start_row, len(self.msbt_accessors))
+    def populate_lms_files_model(self):
+        start_row = self.lms_accessor_names.rowCount()
+        self.lms_accessor_names.insertRows(start_row, len(self.lms_accessors))
 
-        for msbt in self.msbt_accessors:
-            self.msbt_file_names.setData(self.msbt_file_names.index(start_row), msbt.name)
+        for lms_accessor in self.lms_accessors:
+            self.lms_accessor_names.setData(self.lms_accessor_names.index(start_row), lms_accessor.name)
             start_row += 1
 
-        self.msbt_file_names.sort(0)
+        self.lms_accessor_names.sort(0)
 
-    def reset_msbt_files_model(self):
-        self.msbt_file_names.removeRows(0, self.msbt_file_names.rowCount())
+    def reset_lms_accessors_model(self):
+        self.lms_accessor_names.removeRows(0, self.lms_accessor_names.rowCount())
 
     def populate_message_entries_model(self):
         start_row = self.message_entry_names.rowCount()
-        self.message_entry_names.insertRows(start_row, len(self.current_msbt.messages))
+        self.message_entry_names.insertRows(start_row, len(self.current_accessor.messages))
 
-        for message in self.current_msbt.messages:
+        for message in self.current_accessor.messages:
             self.message_entry_names.setData(self.message_entry_names.index(start_row), message.label)
             start_row += 1
 
@@ -307,14 +307,14 @@ class GalaxyMsbtEditor(QMainWindow):
         self.current_arc_path = ""
 
         self.archive = pyjkernel.create_new_archive(root_name, sync_file_ids=True)
-        self.msbt_accessors = []
-        self.current_msbt = None
+        self.lms_accessors = []
+        self.current_accessor = None
         self.current_message = None
 
         self.lineArchivePath.setText(self.current_arc_path)
         self.lineArchiveRoot.setText(self.archive.root_name)
         self.set_archive_components_enabled(True)
-        self.set_msbt_file_components_enabled(True)
+        self.set_lms_file_components_enabled(True)
 
     def open_arc(self):
         if not self.try_prompt_ignore_unsaved_changes():
@@ -335,8 +335,8 @@ class GalaxyMsbtEditor(QMainWindow):
         self.lineArchivePath.setText(self.current_arc_path)
 
         self.archive = None
-        self.msbt_accessors = None
-        self.current_msbt = None
+        self.lms_accessors = None
+        self.current_accessor = None
         self.current_message = None
 
         # Read RARC file
@@ -348,15 +348,15 @@ class GalaxyMsbtEditor(QMainWindow):
     def on_arc_opened(self):
         if not self.rarc_reader_thread.has_exception:
             self.archive = self.rarc_reader_thread.archive
-            self.msbt_accessors = self.rarc_reader_thread.msbt_accessors
+            self.lms_accessors = self.rarc_reader_thread.lms_accessors
 
-            self.populate_msbt_files_model()
+            self.populate_lms_files_model()
             self.lineArchiveRoot.setText(self.archive.root_name)
             self.set_archive_components_enabled(True)
-            self.set_msbt_file_components_enabled(True)
+            self.set_lms_file_components_enabled(True)
         else:
             self.set_archive_components_enabled(False)
-            self.set_msbt_file_components_enabled(False)
+            self.set_lms_file_components_enabled(False)
 
             exception = self.rarc_reader_thread.exception
             description = f"Archive couldn't be loaded because an error occurred:\n\n{repr(exception)}"
@@ -366,7 +366,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.set_file_menu_components_enabled(True)
 
     def save_arc(self, force_new_path: bool):
-        if self.archive is None or self.msbt_accessors is None:
+        if self.archive is None or self.lms_accessors is None:
             return
 
         # Select file to save to if no path has been specified yet
@@ -382,14 +382,14 @@ class GalaxyMsbtEditor(QMainWindow):
 
         self.set_file_menu_components_enabled(False)
         self.rarc_writer_thread\
-            = RarcWriterThread(self, self.current_arc_path, self.archive, self.msbt_accessors)
+            = RarcWriterThread(self, self.current_arc_path, self.archive, self.lms_accessors)
         self.rarc_writer_thread.finished.connect(self.on_arc_saved)
         self.rarc_writer_thread.start()
 
     def on_arc_saved(self):
         if not self.rarc_writer_thread.has_exception:
             self.unsaved_changes = False
-            self.show_info_dialog("The archive and MSBT files were successfully saved!")
+            self.show_info_dialog("Successfully saved all text files and the archive!")
         else:
             exception = self.rarc_writer_thread.exception
             description = f"Archive couldn't be saved because an error occurred:\n\n{repr(exception)}"
@@ -403,44 +403,38 @@ class GalaxyMsbtEditor(QMainWindow):
         pass
 
     # ------------------------------------------------------------------------------------------------------------------
-    # MSBT file creation & deletion
+    # Text file creation & deletion
     # ------------------------------------------------------------------------------------------------------------------
-    def new_msbt(self):
-        # Try enter a name for the MSBT file
-        msbt_name, valid = self.prompt_msbt_name()
+    def new_lms(self):
+        # Try enter a name
+        accessor_name, valid = self.prompt_lms_name()
 
         if not valid:
             return
 
-        if msbt_name == "" or msbt_name == ".msbt":
+        if accessor_name in ["", ".msbt", ".msbf"]:
             self.show_error_dialog(f"No valid name specified!")
             return
 
-        # Append .msbt extension if missing
-        if not msbt_name.endswith(".msbt"):
-            msbt_name += ".msbt"
+        # Check if accessor with same name already exists
+        for lms_accessor in self.lms_accessors:
+            if accessor_name.lower() == lms_accessor.name.lower():
+                self.show_error_dialog("A file with the same name already exists!")
+                return
 
-        # Check if MSBT with same name already exists
-        msbt_path = f"{self.archive.root_name}/{msbt_name}"
-
-        if self.archive.directory_exists(msbt_path):
-            self.show_error_dialog("A file with the same name already exists!")
-            return
-
-        # Create MSBT file and accessor
-        msbt_file = self.archive.create_file(msbt_path)
-        msbt_accessor = MsbtAccessor(self.adapter, msbt_file)
-        self.msbt_accessors.append(msbt_accessor)
+        # Create accessor
+        lms_accessor = LMSAccessor(accessor_name, self.archive, self.adapter)
+        self.lms_accessors.append(lms_accessor)
 
         self.unsaved_changes = True
 
-        # Insert MSBT file name in list model
-        start_row = self.msbt_file_names.rowCount()
-        self.msbt_file_names.insertRow(start_row)
-        self.msbt_file_names.setData(self.msbt_file_names.index(start_row), msbt_accessor.name, 0)
-        self.msbt_file_names.sort(0)
+        # Insert accessor name in list model
+        start_row = self.lms_accessor_names.rowCount()
+        self.lms_accessor_names.insertRow(start_row)
+        self.lms_accessor_names.setData(self.lms_accessor_names.index(start_row), lms_accessor.name, 0)
+        self.lms_accessor_names.sort(0)
 
-    def delete_msbt(self):
+    def delete_lms(self):
         selected_indices = self.listMsbtFiles.selectionModel().selectedIndexes()
 
         if len(selected_indices) < 1:
@@ -449,27 +443,31 @@ class GalaxyMsbtEditor(QMainWindow):
             return
 
         remove_file_names = []
+        remove_accessors = set()
 
         # Remove file names from model
         for selected_index in reversed(selected_indices):
-            remove_file_names.append(self.msbt_file_names.data(selected_index, 0))
-            self.msbt_file_names.removeRow(selected_index.row())
+            remove_file_names.append(self.lms_accessor_names.data(selected_index, 0))
+            self.lms_accessor_names.removeRow(selected_index.row())
 
         # Remove accessors and files inside RARC
         if len(remove_file_names) > 0:
-            for msbt_accessor in list(self.msbt_accessors):
-                if msbt_accessor.name in remove_file_names:
-                    self.msbt_accessors.remove(msbt_accessor)
-                    self.archive.remove_file(f"{self.archive.root_name}/{msbt_accessor.name}")
+            for lms_accessor in self.lms_accessors:
+                if lms_accessor.name in remove_file_names:
+                    remove_accessors.add(lms_accessor)
+                    lms_accessor.delete()
 
                     # If currently selected MSBT is removed, respective components need to be cleared
-                    if self.current_msbt == msbt_accessor:
+                    if self.current_accessor == lms_accessor:
                         self.set_message_entries_components_enabled(False)
                         self.set_message_entry_components_enabled(False)
                         self.reset_message_entries_model()
                         self.reset_message_entry_values()
-                        self.current_msbt = None
+                        self.current_accessor = None
                         self.current_message = None
+
+            for remove_accessor in remove_accessors:
+                self.lms_accessors.remove(remove_accessor)
 
             self.unsaved_changes = True
 
@@ -489,7 +487,7 @@ class GalaxyMsbtEditor(QMainWindow):
 
         # Try to create new entry
         try:
-            self.current_msbt.document.new_message(message_label)
+            self.current_accessor.new_message(message_label)
         except LMSException:
             self.show_error_dialog(f"A message with the label {message_label} already exists!")
             return
@@ -504,30 +502,49 @@ class GalaxyMsbtEditor(QMainWindow):
     def remove_message_entry(self):
         selected_indices = self.listMessageEntries.selectionModel().selectedIndexes()
 
-        if len(selected_indices) < 1:
+        if len(selected_indices) == 0:
             return
         if not self.show_yes_no_prompt("Do you really want to remove the selected message(s)?"):
             return
 
-        remove_message_labels = []
+        # Collect labels and indices to be removed
+        label_model_rows = {}
 
-        # Remove message labels from model
         for selected_index in reversed(selected_indices):
-            remove_message_labels.append(self.message_entry_names.data(selected_index, 0))
-            self.message_entry_names.removeRow(selected_index.row())
+            label = self.message_entry_names.data(selected_index, 0)
+            label_model_rows[label] = selected_index.row()
 
-        # Remove entries from MSBT
-        if len(remove_message_labels) > 0:
-            for message_entry in list(self.current_msbt.messages):
-                if message_entry.label in remove_message_labels:
-                    self.current_msbt.messages.remove(message_entry)
+        # Remove message entries
+        failed_labels = []
 
-                    if self.current_message == message_entry:
-                        self.set_message_entry_components_enabled(False)
-                        self.reset_message_entry_values()
-                        self.current_message = None
+        for label in label_model_rows.keys():
+            if self.current_accessor.delete_message(label):
+                if self.current_message is not None and self.current_message.label == label:
+                    self.set_message_entry_components_enabled(False)
+                    self.reset_message_entry_values()
+                    self.current_message = None
 
-            self.unsaved_changes = True
+                self.unsaved_changes = True
+
+            else:
+                failed_labels.append(label)
+                label_model_rows[label] = -2  # Invalid row to prevent it from deletion
+
+        # Remove labels from model
+        for row in filter(lambda i: i >= 0, label_model_rows.values()):
+            self.message_entry_names.removeRow(row)
+
+        # Notify about failed labels
+        if len(failed_labels) > 0:
+            print_count = min([len(failed_labels), 5])
+            error_msg = "The following messages weren't removed because they are referenced in flowcharts:\n\n"
+            error_msg += "\n".join(failed_labels[:print_count])
+
+            if print_count < len(failed_labels):
+                unprinted_count = len(failed_labels) - print_count
+                error_msg += f"\n... and {unprinted_count} more!"
+
+            self.show_error_dialog(error_msg)
 
     def duplicate_message_entry(self):
         selected_indices = self.listMessageEntries.selectionModel().selectedIndexes()
@@ -543,7 +560,7 @@ class GalaxyMsbtEditor(QMainWindow):
         # self.unsaved_changes = True
 
     def sort_message_entries(self):
-        self.current_msbt.sort_messages()
+        self.current_accessor.sort_messages()
         self.message_entry_names.blockSignals(True)
 
         # Repopulate model without sort function to retain exact natural order of elements
@@ -586,11 +603,11 @@ class GalaxyMsbtEditor(QMainWindow):
         root_name = root_name.strip()
         return root_name, valid
 
-    def prompt_msbt_name(self) -> tuple[str, bool]:
-        msbt_name, valid = QInputDialog.getText(self, self.windowTitle(), "Specify MSBT file name:",
-                                                flags=self.windowFlags())
-        msbt_name = msbt_name.strip()
-        return msbt_name, valid
+    def prompt_lms_name(self) -> tuple[str, bool]:
+        lms_name, valid = QInputDialog.getText(self, self.windowTitle(), "Specify text file name without extension:",
+                                               flags=self.windowFlags())
+        lms_name = lms_name.strip()
+        return lms_name, valid
 
     def prompt_message_label(self) -> tuple[str, bool]:
         message_label, valid = QInputDialog.getText(self, self.windowTitle(), "Specify label (max. 255 characters):",
@@ -603,19 +620,19 @@ class GalaxyMsbtEditor(QMainWindow):
     def select_open_arc_file(self) -> tuple[str, bool]:
         filters = "ARC file (*.arc);;RARC file (*.rarc)"
         last_arc_path = SettingsHolder.get_last_arc_path()
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open MSBTs from ...", directory=last_arc_path, filter=filters)
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open texts from ...", directory=last_arc_path, filter=filters)
         return (file_path, True) if len(file_path) != 0 else ("", False)
 
     def select_save_arc_file(self) -> tuple[str, bool]:
         filters = "ARC file (*.arc);;RARC file (*.rarc)"
         last_arc_path = SettingsHolder.get_last_arc_path()
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save MSBTs to ...", directory=last_arc_path, filter=filters)
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save texts to ...", directory=last_arc_path, filter=filters)
         return (file_path, True) if len(file_path) != 0 else ("", False)
 
     # ------------------------------------------------------------------------------------------------------------------
     # List change events
     # ------------------------------------------------------------------------------------------------------------------
-    def on_msbt_file_selected(self):
+    def on_lms_accessor_selected(self):
         selection = self.listMsbtFiles.selectionModel().selection()
 
         if len(selection.indexes()) != 1:
@@ -623,26 +640,26 @@ class GalaxyMsbtEditor(QMainWindow):
             self.set_message_entry_components_enabled(False)
             self.reset_message_entries_model()
             self.reset_message_entry_values()
-            self.current_msbt = None
+            self.current_accessor = None
             self.current_message = None
             return
 
-        msbt_name: str = self.msbt_file_names.data(selection.indexes()[0], 0)
+        lms_name: str = self.lms_accessor_names.data(selection.indexes()[0], 0)
 
         self.set_message_entries_components_enabled(False)
         self.set_message_entry_components_enabled(False)
         self.reset_message_entries_model()
         self.reset_message_entry_values()
 
-        self.current_msbt = None
+        self.current_accessor = None
         self.current_message = None
 
-        for msbt in self.msbt_accessors:
-            if msbt.name == msbt_name:
-                self.current_msbt = msbt
+        for lms_accessor in self.lms_accessors:
+            if lms_accessor.name == lms_name:
+                self.current_accessor = lms_accessor
                 break
 
-        if self.current_msbt is not None:
+        if self.current_accessor is not None:
             self.populate_message_entries_model()
             self.set_message_entries_components_enabled(True)
 
@@ -661,7 +678,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.reset_message_entry_values()
         self.current_message = None
 
-        for message in self.current_msbt.messages:
+        for message in self.current_accessor.messages:
             if message.label == message_label:
                 self.current_message = message
                 break
@@ -708,29 +725,28 @@ class GalaxyMsbtEditor(QMainWindow):
     # ------------------------------------------------------------------------------------------------------------------
     def set_message_entry_label(self):
         # Try enter a label for the message
-        message_label, valid = self.prompt_message_label()
+        new_label, valid = self.prompt_message_label()
         old_label = self.current_message.label
 
-        if not valid or message_label == old_label:
+        if not valid or new_label == old_label:
             return
 
-        if message_label == "":
+        if new_label == "":
             self.show_error_dialog(f"No valid name specified!")
             return
 
         # Check if label is already used
-        for message in self.current_msbt.messages:
-            if message.label == message_label:
-                self.show_error_dialog(f"A message with the label {message_label} already exists!")
-                return
+        if not self.current_accessor.rename_message(old_label, new_label):
+            self.show_error_dialog(f"A message with the label {new_label} already exists!")
+            return
 
         # Update entry and model
-        self.current_message.label = message_label
+        self.current_message.label = new_label
         self.unsaved_changes = True
 
         row = self.message_entry_names.stringList().index(old_label)
-        self.message_entry_names.setData(self.message_entry_names.index(row), message_label)
-        self.lineLabel.setText(message_label)
+        self.message_entry_names.setData(self.message_entry_names.index(row), new_label)
+        self.lineLabel.setText(new_label)
 
     def open_message_entry_text_editor(self):
         result, valid = self._gui_text_editor_.request(self.current_message.label, self.current_message.text)
@@ -788,31 +804,31 @@ class RarcReaderThread(WorkerThread):
         super().__init__(parent)
         self.adapter: type[SuperMarioGalaxy2Adapter] = adapter
         self.arc_path: str = arc_path
-        self.archive: JKRArchive = None
-        self.msbt_accessors: list[MsbtAccessor] = []
+        self.archive: JKRArchive | None = None
+        self.lms_accessors: list[LMSAccessor] = []
 
     def run(self):
         try:
             self.archive = pyjkernel.from_archive_file(self.arc_path)
 
             for file in filter(lambda f: f.name.endswith(".msbt"), self.archive.list_files(self.archive.root_name)):
-                self.msbt_accessors.append(MsbtAccessor(self.adapter, file))
+                self.lms_accessors.append(LMSAccessor(file.name.removesuffix(".msbt"), self.archive, self.adapter))
         except Exception as e:
             self._exception_ = e
 
 
 class RarcWriterThread(WorkerThread):
-    def __init__(self, parent: QMainWindow, arc_path: str, archive: JKRArchive, msbt_accessors: list[MsbtAccessor]):
+    def __init__(self, parent: QMainWindow, arc_path: str, archive: JKRArchive, lms_accessors: list[LMSAccessor]):
         super().__init__(parent)
         self.arc_path: str = arc_path
         self.archive: JKRArchive = archive
-        self.msbt_accessors: list[MsbtAccessor] = msbt_accessors
+        self.lms_accessors: list[LMSAccessor] = lms_accessors
         self.compress_rarc: bool = SettingsHolder.is_compress_arc()
 
     def run(self):
         try:
-            for msbt_accessor in self.msbt_accessors:
-                msbt_accessor.save()
+            for lms_accessor in self.lms_accessors:
+                lms_accessor.save()
 
             compression = JKRCompression.SZS if self.compress_rarc else JKRCompression.NONE
             pyjkernel.write_archive_file(self.archive, self.arc_path, compression=compression)
