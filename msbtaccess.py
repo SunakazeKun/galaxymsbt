@@ -63,6 +63,19 @@ class LMSAccessor:
 
     # ------------------------------------------------------------------------------------------------------------------
 
+    def get_message(self, label: str) -> LMSMessage:
+        """
+        Retrieves the message entry with the specified label. If there's no associated entry, a KeyError will be thrown.
+
+        :param label: the message's label.
+        :return: the message entry.
+        """
+        for message in self.messages:
+            if message.label == label:
+                return message
+
+        raise KeyError(f"No message labeled {label} found!")
+
     def new_message(self, label: str) -> LMSMessage:
         """
         Creates and returns a new message entry using the given label and adds it to the list of messages. If an entry
@@ -144,6 +157,19 @@ class LMSAccessor:
 
     # ------------------------------------------------------------------------------------------------------------------
 
+    def get_flowchart(self, label: str) -> LMSEntryNode:
+        """
+        Retrieves the flowchart with the specified label. If there's no associated flowchart, a KeyError will be thrown.
+
+        :param label: the flowchart's label.
+        :return: the flowchart.
+        """
+        for flowchart in self.flowcharts:
+            if flowchart.label == label:
+                return flowchart
+
+        raise KeyError(f"No flowchart labeled {label} found!")
+
     def new_flowchart(self, label: str) -> LMSEntryNode:
         """
         Creates and returns a new flowchart using the given label and adds it to the list of flowcharts. If a flowchart
@@ -155,7 +181,27 @@ class LMSAccessor:
         return self._flows_.new_flowchart(label)
 
     def delete_flowchart(self, label: str) -> bool:
-        return False
+        """
+        Tries to delete the flowchart with the specified label. This always returns True. If there's no flowchart with
+        such label, a KeyError will be thrown.
+
+        :param label: the flowchart's label that should be deleted.
+        :return: always True.
+        """
+        # Find index of message associated with label
+        index = -1
+
+        for i, flowchart in enumerate(self.flowcharts):
+            if flowchart.label == label:
+                index = i
+                break
+
+        if index == -1:
+            raise KeyError(f"No flowchart labeled {label} found!")
+
+        # Remove the actual entry
+        self.flowcharts.pop(index)
+        return True
 
     def rename_flowchart(self, old_label: str, new_label: str) -> bool:
         return False
@@ -167,6 +213,10 @@ class LMSAccessor:
     # ------------------------------------------------------------------------------------------------------------------
 
     def save(self):
+        """
+        Packs the messages and flowcharts and saves them to their respective MSBT/MSBF files in the archive. If either
+        has no entries, the respective files won't be created or will be removed if they exist.
+        """
         msbt_file: JKRArchiveFile
         msbf_file: JKRArchiveFile
         msbt_path = create_msbt_file_path(self._archive_, self._name_)
@@ -254,8 +304,22 @@ def flattened_nodes(flowchart: LMSEntryNode) -> Generator:
 
 
 def create_msbt_file_path(archive: JKRArchive, lms_name: str) -> str:
+    """
+    Constructs the MSBT file path to the LMS document in the given archive.
+
+    :param archive: the archive.
+    :param lms_name: the LMS document's name
+    :return: the file path.
+    """
     return f"{archive.root_name}/{lms_name}.msbt"
 
 
 def create_msbf_file_path(archive: JKRArchive, lms_name: str) -> str:
+    """
+    Constructs the MSBF file path to the LMS flows in the given archive.
+
+    :param archive: the archive.
+    :param lms_name: the LMS flows' name
+    :return: the file path.
+    """
     return f"{archive.root_name}/{lms_name}.msbf"
