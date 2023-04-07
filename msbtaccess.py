@@ -277,8 +277,8 @@ class LMSAccessor:
 
 def flattened_nodes(flowchart: LMSEntryNode) -> Generator:
     """
-    Generator that yields the flow nodes in the given flowchart. This is done using breadth-first search. Every flow
-    node will be yielded exactly once, even if they are referenced more than once. This always starts at the root node.
+    Generator that yields the flow nodes in the given flowchart. This is done using breadth-first search, starting at
+    the root node. Every flow node will be yielded exactly once, even if they are referenced more than once.
 
     :param flowchart: the flowchart.
     :return: the next flow node.

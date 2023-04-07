@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import gc
-
 from pyjkernel import JKRArchive, JKRCompression
 from pymsb import LMSMessage, LMSEntryNode, LMSException
 from msbtaccess import LMSAccessor
@@ -68,7 +66,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.buttonMessagesRemove: QPushButton = None
         self.buttonMessagesDuplicate: QPushButton = None
         self.buttonMessagesSort: QPushButton = None
-        self.listMessageEntries: QListView = None
+        self.listMessages: QListView = None
 
         self.buttonFlowchartsAdd: QPushButton = None
         self.buttonFlowchartsRemove: QPushButton = None
@@ -78,7 +76,7 @@ class GalaxyMsbtEditor(QMainWindow):
 
         self.buttonChangeLabel: QPushButton = None
         self.buttonShowEditor: QPushButton = None
-        self.lineLabel: QLineEdit = None
+        self.lineChangeLabel: QLineEdit = None
         self.comboTalkType: QComboBox = None
         self.comboBalloonType: QComboBox = None
         self.comboSoundName: QComboBox = None
@@ -98,7 +96,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.model_message_names = QStringListModel()
         self.model_flowchart_names = QStringListModel()
         self.listLmsAccessors.setModel(self.model_lms_accessor_names)
-        self.listMessageEntries.setModel(self.model_message_names)
+        self.listMessages.setModel(self.model_message_names)
         self.listFlowcharts.setModel(self.model_flowchart_names)
 
         self.actionOptionCompression.blockSignals(True)
@@ -165,7 +163,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.buttonMessagesRemove.clicked.connect(self.remove_message)
         self.buttonMessagesDuplicate.clicked.connect(self.duplicate_message)
         self.buttonMessagesSort.clicked.connect(self.sort_messages)
-        self.listMessageEntries.selectionModel().selectionChanged.connect(self.on_message_selected)
+        self.listMessages.selectionModel().selectionChanged.connect(self.on_message_selected)
 
         # Flowchart events
         self.buttonFlowchartsAdd.clicked.connect(self.create_flowchart)
@@ -243,13 +241,13 @@ class GalaxyMsbtEditor(QMainWindow):
         self.buttonMessagesRemove.blockSignals(not state)
         self.buttonMessagesDuplicate.blockSignals(not state)
         self.buttonMessagesSort.blockSignals(not state)
-        self.listMessageEntries.selectionModel().blockSignals(not state)
+        self.listMessages.selectionModel().blockSignals(not state)
 
         self.buttonMessagesAdd.setEnabled(state)
         self.buttonMessagesRemove.setEnabled(state)
         self.buttonMessagesDuplicate.setEnabled(state)
         self.buttonMessagesSort.setEnabled(state)
-        self.listMessageEntries.setEnabled(state)
+        self.listMessages.setEnabled(state)
 
     def set_flowcharts_components_enabled(self, state: bool):
         self.buttonFlowchartsAdd.blockSignals(not state)
@@ -279,7 +277,7 @@ class GalaxyMsbtEditor(QMainWindow):
 
         self.buttonChangeLabel.setEnabled(state)
         self.buttonShowEditor.setEnabled(state)
-        self.lineLabel.setEnabled(state)
+        self.lineChangeLabel.setEnabled(state)
         self.comboSoundName.setEnabled(state)
         self.comboTalkType.setEnabled(state)
         self.comboBalloonType.setEnabled(state)
@@ -326,7 +324,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.model_flowchart_names.removeRows(0, self.model_flowchart_names.rowCount())
 
     def reset_message_entry_values(self):
-        self.lineLabel.setText("null")
+        self.lineChangeLabel.setText("null")
         self.comboSoundName.setCurrentIndex(1)
         self.comboTalkType.setCurrentIndex(0)
         self.comboBalloonType.setCurrentIndex(0)
@@ -336,6 +334,18 @@ class GalaxyMsbtEditor(QMainWindow):
         self.spinUnk7.setValue(255)
         self.textMessageText.setPlainText("")
         self.textComment.setPlainText("")
+
+    def status_info(self, text: str, duration: int = 5000):
+        self.statusBar.setStyleSheet("QStatusBar{padding:8px;color:lightgreen;}")
+        self.statusBar.showMessage(text, duration)
+
+    def status_warn(self, text: str, duration: int = 5000):
+        self.statusBar.setStyleSheet("QStatusBar{padding:8px;color:yellow;}")
+        self.statusBar.showMessage(text, duration)
+
+    def status_error(self, text: str, duration: int = 5000):
+        self.statusBar.setStyleSheet("QStatusBar{padding:8px;color:red;}")
+        self.statusBar.showMessage(text, duration)
 
     # ------------------------------------------------------------------------------------------------------------------
     # ARC creation, opening & saving
@@ -408,6 +418,7 @@ class GalaxyMsbtEditor(QMainWindow):
             self.lineArchiveRoot.setText(self.archive.root_name)
             self.set_archive_components_enabled(True)
             self.set_lms_file_components_enabled(True)
+            self.status_info("Successfully loaded the text files.")
         else:
             self.set_archive_components_enabled(False)
             self.set_lms_file_components_enabled(False)
@@ -415,6 +426,7 @@ class GalaxyMsbtEditor(QMainWindow):
             exception = self.rarc_reader_thread.exception
             description = f"Archive couldn't be loaded because an error occurred:\n\n{repr(exception)}"
             self.show_error_dialog(description)
+            self.status_error("An error occurred while loading the text files.")
 
         del self.rarc_reader_thread
         self.set_file_menu_components_enabled(True)
@@ -557,7 +569,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.model_message_names.setData(self.model_message_names.index(start_row), message_label, 0)
 
     def remove_message(self):
-        selected_indices = self.listMessageEntries.selectionModel().selectedIndexes()
+        selected_indices = self.listMessages.selectionModel().selectedIndexes()
 
         if len(selected_indices) == 0:
             return
@@ -610,7 +622,7 @@ class GalaxyMsbtEditor(QMainWindow):
 
     def duplicate_message(self):
         self.show_wip()
-        selected_indices = self.listMessageEntries.selectionModel().selectedIndexes()
+        selected_indices = self.listMessages.selectionModel().selectedIndexes()
 
         if len(selected_indices) < 1:
             return
@@ -627,7 +639,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.model_message_names.blockSignals(True)
 
         # Repopulate model without sort function to retain exact natural order of elements
-        self.listMessageEntries.selectionModel().clearSelection()
+        self.listMessages.selectionModel().clearSelection()
         self.reset_messages_model()
         self.model_message_names.blockSignals(False)
         self.populate_messages_model()
@@ -719,7 +731,7 @@ class GalaxyMsbtEditor(QMainWindow):
             self.set_flowcharts_components_enabled(True)
 
     def on_message_selected(self):
-        selection = self.listMessageEntries.selectionModel().selection()
+        selection = self.listMessages.selectionModel().selection()
         self.set_message_entry_components_enabled(False)
         self.reset_message_entry_values()
         self.current_message = None
@@ -734,7 +746,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.set_message_entry_components_enabled(True)
 
     def on_flowchart_selected(self):
-        selection = self.listMessageEntries.selectionModel().selection()
+        selection = self.listMessages.selectionModel().selection()
         self.current_flowchart = None
 
         if len(selection.indexes()) != 1:
@@ -747,7 +759,7 @@ class GalaxyMsbtEditor(QMainWindow):
     # Message entry events
     # ------------------------------------------------------------------------------------------------------------------
     def populate_from_current_message(self):
-        self.lineLabel.setText(self.current_message.label)
+        self.lineChangeLabel.setText(self.current_message.label)
 
         attributes = self.current_message.attributes
         talk_type = attributes["talk_type"]
@@ -802,7 +814,7 @@ class GalaxyMsbtEditor(QMainWindow):
 
         row = self.model_message_names.stringList().index(old_label)
         self.model_message_names.setData(self.model_message_names.index(row), new_label)
-        self.lineLabel.setText(new_label)
+        self.lineChangeLabel.setText(new_label)
 
     def open_message_entry_text_editor(self):
         result, valid = self._gui_text_editor_.request(self.current_message.label, self.current_message.text)
