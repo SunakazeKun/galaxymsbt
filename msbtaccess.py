@@ -285,20 +285,22 @@ def flattened_nodes(flowchart: LMSEntryNode) -> Generator:
     """
     remaining = [flowchart]
     marked = set()
+    marked.add(flowchart)
 
     while len(remaining) > 0:
         current_node = remaining.pop(0)
         next_node = current_node.next_node
-        marked.add(current_node)
 
         if next_node is not None and next_node not in marked:
             remaining.append(next_node)
+            marked.add(next_node)
 
         if type(current_node) == LMSBranchNode:
             next_node = current_node.next_node_else
 
             if next_node is not None and next_node not in marked:
                 remaining.append(next_node)
+                marked.add(next_node)
 
         yield current_node
 

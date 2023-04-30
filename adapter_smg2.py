@@ -746,3 +746,36 @@ class SuperMarioGalaxy2Adapter(LMSAdapter):
         "SE_SV_HINT_TV_TALK_OK",
         "SE_SV_PEACH_NPC_THANK_YOU"
     ]
+    FLOW_EVENT_TYPES = [
+        "EventFunc",
+        "EventFunc (1)",
+        "(undefined)",
+        "Forward",
+        "AnimeFunc",
+        "Activate SW_A",
+        "Activate SW_B",
+        "KillFunc",
+        "Deactivate SW_A",
+        "Deactivate SW_B",
+        "???",
+        "???"
+    ]
+    FLOW_BRANCH_TYPES = [
+        "Yes/No selection",
+        "BranchFunc",
+        "Player is close?",
+        "Is SW_A on?",
+        "Is SW_B on?",
+        "Player has no Power-up?",
+        "Player has Bee Power-up?",
+        "Player has Boo Power-up?",
+        "Power Star appeared?",
+        "Player is Luigi?",
+        "Cutscene is active?",
+        "Check already read flag?",
+        "Saw 120 Power Stars ending?",
+        "???",
+        "Player rides Yoshi?",
+        "Player has Cloud Power-up?",
+        "Player has Rock Power-up?"
+    ]

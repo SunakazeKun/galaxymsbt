@@ -3,6 +3,7 @@ from __future__ import annotations
 from pyjkernel import JKRArchive, JKRCompression
 from pymsb import LMSMessage, LMSEntryNode, LMSException
 from msbtaccess import LMSAccessor
+from gui_flows import FlowchartEditor
 from gui_text import GalaxyTextEditor
 from guihelpers import SettingsHolder, WorkerThread, resolve_asset, PROGRAM_TITLE
 from adapter_smg2 import SuperMarioGalaxy2Adapter
@@ -45,6 +46,7 @@ class GalaxyMsbtEditor(QMainWindow):
 
         # Helper forms
         self._gui_text_editor_: GalaxyTextEditor = None
+        self._gui_flowchart_editor_: FlowchartEditor = None
 
         # UI elements (initialized by UI loader)
         self.statusBar: QStatusBar = None
@@ -136,6 +138,7 @@ class GalaxyMsbtEditor(QMainWindow):
 
     def init_subforms(self):
         self._gui_text_editor_ = GalaxyTextEditor(self, self.adapter)
+        self._gui_flowchart_editor_ = FlowchartEditor(self, self.adapter)
 
     def init_events(self):
         # File menu events
@@ -171,6 +174,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.buttonFlowchartsDuplicate.clicked.connect(self.duplicate_flowchart)
         self.buttonFlowchartsSort.clicked.connect(self.sort_flowcharts)
         self.listFlowcharts.selectionModel().selectionChanged.connect(self.on_flowchart_selected)
+        self.listFlowcharts.doubleClicked.connect(self.open_flowchart_editor)
 
         # Message component events
         self.buttonChangeLabel.clicked.connect(self.set_message_entry_label)
@@ -746,7 +750,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.set_message_entry_components_enabled(True)
 
     def on_flowchart_selected(self):
-        selection = self.listMessages.selectionModel().selection()
+        selection = self.listFlowcharts.selectionModel().selection()
         self.current_flowchart = None
 
         if len(selection.indexes()) != 1:
@@ -754,6 +758,12 @@ class GalaxyMsbtEditor(QMainWindow):
 
         label: str = self.model_flowchart_names.data(selection.indexes()[0], 0)
         self.current_flowchart = self.current_accessor.get_flowchart(label)
+
+    def open_flowchart_editor(self):
+        if self.current_flowchart is None:
+            return
+
+        self._gui_flowchart_editor_.show(self.current_flowchart)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Message entry events

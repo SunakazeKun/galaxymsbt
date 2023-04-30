@@ -1,8 +1,9 @@
 /.idea
-/__pycache__
 /build
 /dist
 /venv
+/.private
+__pycache__
 adapter_config.json
 *.ini
 *.msbt
