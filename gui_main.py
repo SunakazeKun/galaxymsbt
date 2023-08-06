@@ -746,7 +746,7 @@ class GalaxyMsbtEditor(QMainWindow):
         self.set_message_entry_components_enabled(True)
 
     def on_flowchart_selected(self):
-        selection = self.listMessages.selectionModel().selection()
+        selection = self.listFlowcharts.selectionModel().selection()
         self.current_flowchart = None
 
         if len(selection.indexes()) != 1:
