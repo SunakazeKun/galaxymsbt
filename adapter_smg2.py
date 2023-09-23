@@ -470,7 +470,7 @@ class SuperMarioGalaxy2Adapter(LMSAdapter):
 
     FONT_COLORS = ["black", "red", "green", "blue", "yellow", "purple", "orange", "grey"]
     FONT_SIZES = ["small", "normal", "large"]
-    RACE_TIMES = ["jungle_glider", "challenge_glider", "last"]
+    RACE_TIMES = ["jungle_glider", "challenge_glider", "reserved2", "reserved3", "reserved4", "last"]
     PICTURE_CODES = list(range(0, 44)) + list(range(49, 78))
     PICTURE_NAMES = [
         "a_button",
@@ -549,7 +549,7 @@ class SuperMarioGalaxy2Adapter(LMSAdapter):
     ]
 
     TALK_TYPES = ["Normal", "Shout", "Auto", "Global"]
-    BALLOON_TYPES = ["White box", "White box (1)", "\"Call\"", "Signboard", "Icon bubble"]
+    BALLOON_TYPES = ["White box", "White box (1)", "White box without A icon", "Signboard", "Icon bubble"]
     CAMERA_TYPES = ["Normal", "Event", "None"]
     MESSAGE_SOUNDS = [
         "null (0)",
